@@ -1,0 +1,38 @@
+[class*="cell-"] {
+  border: 1px solid black;
+  width: 2em;
+  height: 2em;
+  margin: 0 auto;
+  text-align: center;
+  vertical-align: center;
+}
+
+.cell-blank {
+  background-color: gray;
+}
+
+.cell-flag {
+  background-color: gray;
+  background-image: url("./triangular-flag.png");
+  background-size: 2em 2em;
+  background-repeat: no-repeat;
+}
+
+.cell-mine {
+  background-color: red;
+}
+
+.row {
+  margin: auto;
+  list-style: outside none none;
+}
+
+.boardTable {
+  margin-left: auto;
+  margin-right: auto;
+  border-collapse: collapse;
+}
+
+.input-small {
+  width: 3em;
+}
