@@ -5,26 +5,26 @@ class Cell extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {flag: false, display: false };
+    this.state = { flag: false, display: false };
     this.clickHandler = this.clickHandler.bind(this);
     this.contextHandler = this.contextHandler.bind(this);
-    this.getDisplay = this.getDisplay.bind(this);
+    this.getRevealed = this.getRevealed.bind(this);
   }
 
-  getDisplay() {
+  getRevealed() {
     return this.state.display;
   }
 
   clickHandler() {
-    console.log("clickHandler on", this.props.index)
     if (!this.state.flag && !this.state.display) {
-      this.setState({display: true});
+      this.setState({ display: true });
       this.forceUpdate();
       if (this.props.value === -1) {
         this.props.onLose();
       } else if (this.props.value === 0) {
         this.props.openAdjacent(this.props.index);
       }
+      this.props.checkWin();
     }
   }
 
@@ -80,10 +80,13 @@ class Board extends React.Component {
     this.openAdjacent = this.openAdjacent.bind(this);
     this.seen = [];
     this.rows = [];
+    this.getNumMines = this.getNumMines.bind(this);
+    this.getUnrevealed = this.getUnrevealed.bind(this);
   }
 
   generateValue(mines, c, r) {
     const index = r * this.props.y + c;
+    console.log(mines);
     if (mines.includes(index)) {
       // this is a mine
       return -1;
@@ -131,7 +134,6 @@ class Board extends React.Component {
   }
 
   checkAndSetDisplay(seen, index) {
-    console.log(this.seen);
     if (!this.seen.includes(index)) {
       this.seen.push(index);
       this.cells[index].current.clickHandler();
@@ -163,28 +165,24 @@ class Board extends React.Component {
       }
       this.checkAndSetDisplay(seen, index + this.props.y);
       if (c < this.props.x - 1) {
-        this.checkAndSetDisplay(seen, index+this.props.y + 1);
+        this.checkAndSetDisplay(seen, index + this.props.y + 1);
       }
     }
   }
 
+  getUnrevealed() {
+    var unrevealed = 0;
+    this.cells.forEach(c => { if (!c.current.getRevealed()) { unrevealed++; } });
+    return unrevealed;
+  }
+
+  getNumMines() {
+    return this.mines.length;
+  }
+
   generateBoard() {
     this.rows = []
-    this.setState({display: []})
-    const mines = []
-    var attempts = 0;
-    while (mines.length < this.props.numMines) {
-      // gen position for mine
-      var coords = Math.floor(Math.random() * this.props.x * this.props.y)
-      if (!(coords in mines)) {
-        mines.push(coords);
-      }
-      if (attempts > 100) {
-        console.log("I gave up making mines");
-        break;
-      }
-      attempts++;
-    }
+    this.setState({ display: [] })
 
     var r = 0;
     var c = 0;
@@ -193,7 +191,7 @@ class Board extends React.Component {
       const cells = [];
       for (c = 0; c < this.props.x; c++) {
         const index = r * this.props.y + c;
-        const value = this.generateValue(mines, c, r);
+        const value = this.generateValue(this.props.mines, c, r);
         this.cells[index] = React.createRef();
         cells.push(<Cell
           key={index}
@@ -201,7 +199,8 @@ class Board extends React.Component {
           value={value}
           onLose={this.props.onLose}
           openAdjacent={this.openAdjacent}
-          ref={this.cells[index]}/>)
+          ref={this.cells[index]}
+          checkWin={this.props.checkWin} />)
       }
       this.rows.push(<tr key={r} className="row">{cells}</tr>)
     }
@@ -225,20 +224,20 @@ class Controller extends React.Component {
       <table>
         <thead>
           <tr>
-          <th>Rows</th>
-          <th>Columns</th>
-          <th>Mines</th>
+            <th>Rows</th>
+            <th>Columns</th>
+            <th>Mines</th>
           </tr>
         </thead>
         <tbody>
-        <tr>
-          <td><input className="input-small" type="text" value={this.props.y} onChange={this.props.setY}/></td>
-          <td><input className="input-small" type="text" value={this.props.x} onChange={this.props.setX}/></td>
-          <td><input className="input-small" type="text" value={this.props.numMines} onChange={this.props.setNumMines}/></td>
-        </tr>
-        <tr>
-          <td><input type="submit" onClick={this.props.clickHandler} value="Render"/></td>
-        </tr>
+          <tr>
+            <td><input className="input-small" type="text" value={this.props.y} onChange={this.props.setY} /></td>
+            <td><input className="input-small" type="text" value={this.props.x} onChange={this.props.setX} /></td>
+            <td><input className="input-small" type="text" value={this.props.numMines} onChange={this.props.setNumMines} /></td>
+          </tr>
+          <tr>
+            <td><input type="submit" onClick={this.props.clickHandler} value="Render" /></td>
+          </tr>
         </tbody>
       </table>)
   }
@@ -248,37 +247,64 @@ class MineSweeper extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {x: 10, y: 10, numMines: 5}
+    this.state = { x: 10, y: 10, numMines: 5 }
     this.startGame = this.startGame.bind(this);
     this.setX = this.setX.bind(this);
     this.setY = this.setY.bind(this);
     this.setNumMines = this.setNumMines.bind(this);
     this.board = React.createRef();
+    this.mines = [];
+    this.checkWin = this.checkWin.bind(this);
   }
 
   setX(e) {
-    this.setState({x: e.target.value});
+    this.setState({ x: e.target.value });
   }
 
   setY(e) {
-    this.setState({y: e.target.value});
+    this.setState({ y: e.target.value });
   }
 
   setNumMines(e) {
-    this.setState({numMines: e.target.value});
+    this.setState({ numMines: e.target.value });
   }
 
   renderCallback() {
-    this.setState({toRender: false})
+    this.setState({ toRender: false })
   }
 
   startGame() {
-    console.log("starting");
+    this.generateMines();
     this.board.current.generateBoard();
   }
 
   onLose() {
     console.log("lose!");
+  }
+
+  generateMines() {
+    var attempts = 0;
+    while (this.mines.length < this.state.numMines) {
+      // gen position for mine
+      var coords = Math.floor(Math.random() * this.state.x * this.state.y)
+      if (!(coords in this.mines)) {
+        this.mines.push(coords);
+        attempts = 0
+      } else {
+        attempts++;
+        if (attempts > 100) {
+          console.log("I gave up making mines");
+          break;
+        }
+      }
+    }
+
+  }
+
+  checkWin() {
+    if (this.mines.length === this.board.current.getUnrevealed()) {
+      console.log("win!");
+    }
   }
 
   render() {
@@ -287,10 +313,10 @@ class MineSweeper extends React.Component {
       <div className="game">
         <h1>MineSweeper</h1>
         <div className="controller">
-          <Controller clickHandler={this.startGame} x={this.state.x} y={this.state.y} numMines={this.state.numMines} setX={this.setX} setY={this.setY} setNumMines={this.setNumMines}/>
+          <Controller clickHandler={this.startGame} x={this.state.x} y={this.state.y} numMines={this.state.numMines} setX={this.setX} setY={this.setY} setNumMines={this.setNumMines} />
         </div>
         <div className="board">
-          <Board onLose={this.onLose} x={this.state.x} y={this.state.y} numMines={this.state.numMines} ref={this.board}/>
+          <Board onLose={this.onLose} x={this.state.x} y={this.state.y} mines={this.mines} ref={this.board} checkWin={this.checkWin} />
         </div>
       </div>
     )
