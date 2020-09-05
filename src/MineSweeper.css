@@ -11,13 +11,6 @@
   background-color: gray;
 }
 
-.cell-flag {
-  background-color: gray;
-  background-image: url("./triangular-flag.png");
-  background-size: 2em 2em;
-  background-repeat: no-repeat;
-}
-
 .cell-mine {
   background-color: red;
 }
