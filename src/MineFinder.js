@@ -1,6 +1,9 @@
 import React from 'react';
 import './MineFinder.css';
 
+// delay for checking win state to make sure all the environment is fixed
+const WIN_DELAY = 100;
+
 class Cell extends React.Component {
 
   constructor(props) {
@@ -30,7 +33,7 @@ class Cell extends React.Component {
       } else if (this.props.value === 0) {
         this.props.openAdjacent(this.props.index);
       }
-      this.props.checkWin();
+      setTimeout(this.props.checkWin, WIN_DELAY);
     }
   }
 
@@ -283,8 +286,9 @@ class MineFinder extends React.Component {
   }
 
   checkWin() {
+    console.log(this.mines.length, this.board.current.getUnrevealed());
     if (this.mines.length === this.board.current.getUnrevealed()) {
-      console.log("win!");
+      alert("win!");
     }
   }
 
