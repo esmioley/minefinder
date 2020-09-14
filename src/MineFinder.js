@@ -1,5 +1,5 @@
 import React from 'react';
-import './MineSweeper.css';
+import './MineFinder.css';
 
 class Cell extends React.Component {
 
@@ -202,11 +202,11 @@ class Board extends React.Component {
 class Controller extends React.Component {
   render() {
     return (
-      <table>
+      <table className="controller-table">
         <thead>
           <tr>
             <th>Rows</th>
-            <th>Columns</th>
+            <th>Cols</th>
             <th>Mines</th>
           </tr>
         </thead>
@@ -217,14 +217,14 @@ class Controller extends React.Component {
             <td><input className="input-small" type="text" value={this.props.numMines} onChange={this.props.setNumMines} /></td>
           </tr>
           <tr>
-            <td><input type="submit" onClick={this.props.clickHandler} value="Render" /></td>
+            <td colSpan="3" className="buttonCell"><input type="submit" onClick={this.props.clickHandler} value="Render" /></td>
           </tr>
         </tbody>
       </table>)
   }
 }
 
-class MineSweeper extends React.Component {
+class MineFinder extends React.Component {
 
   constructor(props) {
     super(props);
@@ -292,7 +292,7 @@ class MineSweeper extends React.Component {
 
     return (
       <div className="game">
-        <h1>MineSweeper</h1>
+        <h1>MineFinder</h1>
         <div className="controller">
           <Controller clickHandler={this.startGame} x={this.state.x} y={this.state.y} numMines={this.state.numMines} setX={this.setX} setY={this.setY} setNumMines={this.setNumMines} />
         </div>
@@ -304,4 +304,4 @@ class MineSweeper extends React.Component {
   }
 }
 
-export default MineSweeper;
+export default MineFinder;

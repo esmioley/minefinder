@@ -29,3 +29,16 @@
 .input-small {
   width: 3em;
 }
+
+h1 {
+  text-align: center;
+}
+
+.controller-table {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.buttonCell {
+  text-align: center;
+}

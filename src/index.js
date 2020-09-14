@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import MineSweeper from './MineSweeper';
+import MineFinder from './MineFinder';
 
 ReactDOM.render(
   <React.StrictMode>
-    <MineSweeper />
+    <MineFinder />
   </React.StrictMode>,
   document.getElementById('root')
 );
