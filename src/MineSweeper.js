@@ -9,10 +9,16 @@ class Cell extends React.Component {
     this.clickHandler = this.clickHandler.bind(this);
     this.contextHandler = this.contextHandler.bind(this);
     this.getRevealed = this.getRevealed.bind(this);
+    this.clearDisplay = this.clearDisplay.bind(this);
   }
 
   getRevealed() {
     return this.state.display;
+  }
+
+  clearDisplay() {
+    console.log("clearing display for ", this.props.index);
+    this.setState({display: false});
   }
 
   clickHandler() {
@@ -28,10 +34,10 @@ class Cell extends React.Component {
     }
   }
 
-  contextHandler() {
+  contextHandler(e) {
+    e.preventDefault();
     if (!this.state.display) {
       this.setState(state => ({ flag: !this.state.flag }));
-      return false;
     }
   }
 
