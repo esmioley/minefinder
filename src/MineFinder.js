@@ -20,7 +20,6 @@ class Cell extends React.Component {
   }
 
   clearDisplay() {
-    console.log("clearing display for ", this.props.index);
     this.setState({display: false});
   }
 
@@ -263,7 +262,7 @@ class MineFinder extends React.Component {
   }
 
   onLose() {
-    console.log("lose!");
+    alert("lose!");
   }
 
   generateMines() {
@@ -277,7 +276,6 @@ class MineFinder extends React.Component {
       } else {
         attempts++;
         if (attempts > 100) {
-          console.log("I gave up making mines");
           break;
         }
       }
@@ -286,7 +284,6 @@ class MineFinder extends React.Component {
   }
 
   checkWin() {
-    console.log(this.mines.length, this.board.current.getUnrevealed());
     if (this.mines.length === this.board.current.getUnrevealed()) {
       alert("win!");
     }
