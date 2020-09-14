@@ -88,55 +88,53 @@ class Board extends React.Component {
     this.rows = [];
     this.getNumMines = this.getNumMines.bind(this);
     this.getUnrevealed = this.getUnrevealed.bind(this);
+    this.generateValues = this.generateValues.bind(this);
+    this.values = [];
   }
 
-  generateValue(mines, c, r) {
-    const index = r * this.props.y + c;
-    console.log(mines);
-    if (mines.includes(index)) {
-      // this is a mine
-      return -1;
-    }
-    var result = 0;
-    var top_left = -1;
-    var top = -1;
-    var top_right = -1;
-    var left = -1;
-    var right = -1;
-    var bottom_left = -1;
-    var bottom = -1;
-    var bottom_right = -1;
+  /* return array of indexes that are valid surrounding cells */
+  getSurrounding(index) {
+    const surrounding = [];
+    const r = Math.floor(index  / this.props.y);
+    const c = index % this.props.y;
     if (r > 0) {
-      top = (r - 1) * this.props.y + c;
+      surrounding.push((r - 1) * this.props.y + c);
       if (c > 0) {
-        top_left = top - 1;
+        surrounding.push((r - 1) * this.props.y + c - 1);
       }
       if (c < this.props.x - 1) {
-        top_right = top + 1;
+        surrounding.push((r - 1) * this.props.y + c + 1);
       }
     }
     if (c > 0) {
-      left = r * this.props.y + c - 1;
+      surrounding.push(r * this.props.y + c - 1);
     }
     if (c < this.props.x - 1) {
-      right = r * this.props.y + c + 1;
+      surrounding.push(r * this.props.y + c + 1);
     }
     if (r < this.props.y - 1) {
-      bottom = (r + 1) * this.props.y + c;
+      surrounding.push((r + 1) * this.props.y + c);
       if (c > 0) {
-        bottom_left = bottom - 1;
+        surrounding.push((r + 1) * this.props.y + c - 1);
       }
       if (c < this.props.x - 1) {
-        bottom_right = bottom + 1;
+        surrounding.push((r + 1) * this.props.y + c + 1);
       }
     }
-    const surroundings = [top_left, top, top_right, left, right, bottom_left, bottom, bottom_right];
-    surroundings.forEach(element => {
-      if (mines.includes(element)) {
-        result += 1;
-      }
-    });
-    return result;
+    return surrounding;
+  }
+
+  generateValues() {
+    this.values = Array(this.props.x * this.props.y).fill(0);
+    this.props.mines.forEach(m => {
+      const surrounding = this.getSurrounding(m);
+      this.values[m] = -1;
+      surrounding.forEach(s => {
+        if (this.values[s] !== -1) {
+          this.values[s] += 1;
+        }
+      })
+    })
   }
 
   checkAndSetDisplay(seen, index) {
@@ -147,33 +145,9 @@ class Board extends React.Component {
   }
 
   openAdjacent(index) {
-    const r = Math.floor(index / this.props.y);
-    const c = index % this.props.y;
     const seen = [];
-    if (r > 0) {
-      if (c > 0) {
-        this.checkAndSetDisplay(seen, index - this.props.y - 1);
-      }
-      this.checkAndSetDisplay(seen, index - this.props.y);
-      if (c < this.props.x - 1) {
-        this.checkAndSetDisplay(seen, index - this.props.y + 1);
-      }
-    }
-    if (c > 0) {
-      this.checkAndSetDisplay(seen, index - 1);
-    }
-    if (c < this.props.x - 1) {
-      this.checkAndSetDisplay(seen, index + 1);
-    }
-    if (r < this.props.y - 1) {
-      if (c > 0) {
-        this.checkAndSetDisplay(seen, index + this.props.y - 1);
-      }
-      this.checkAndSetDisplay(seen, index + this.props.y);
-      if (c < this.props.x - 1) {
-        this.checkAndSetDisplay(seen, index + this.props.y + 1);
-      }
-    }
+    const surroundings = this.getSurrounding(index);
+    surroundings.forEach(s => {this.checkAndSetDisplay(seen, s);});
   }
 
   getUnrevealed() {
@@ -187,8 +161,9 @@ class Board extends React.Component {
   }
 
   generateBoard() {
-    this.rows = []
-    this.setState({ display: [] })
+    this.rows = [];
+    this.setState({ display: [] });
+    this.generateValues();
 
     var r = 0;
     var c = 0;
@@ -197,7 +172,7 @@ class Board extends React.Component {
       const cells = [];
       for (c = 0; c < this.props.x; c++) {
         const index = r * this.props.y + c;
-        const value = this.generateValue(this.props.mines, c, r);
+        const value = this.values[index];
         this.cells[index] = React.createRef();
         cells.push(<Cell
           key={index}
